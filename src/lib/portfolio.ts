@@ -32,7 +32,7 @@ export function executeTrade(
 
   if (side === "buy") {
     if (total > next.cash) {
-      return { portfolio, error: "Insufficient demo cash" };
+      return { portfolio, error: "Insufficient cash" };
     }
     next.cash -= total;
     if (idx >= 0) {

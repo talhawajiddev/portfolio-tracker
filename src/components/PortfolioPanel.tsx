@@ -55,9 +55,9 @@ export function PortfolioPanel({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-app bg-surface p-5">
+      <div className="rounded-2xl border border-app bg-surface p-4 sm:p-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-app-fg">Demo Portfolio</h2>
+          <h2 className="text-sm font-semibold text-app-fg">Portfolio</h2>
           <button
             type="button"
             onClick={onReset}
@@ -97,7 +97,7 @@ export function PortfolioPanel({
         </div>
 
         <div className="mt-4 space-y-2">
-          <div className="flex gap-1 rounded-lg border border-app bg-surface-2 p-1">
+          <div className="flex flex-col gap-1 rounded-lg border border-app bg-surface-2 p-1 sm:flex-row">
             {(
               [
                 ["deposit", "Deposit", ArrowDownLeft],
@@ -112,7 +112,7 @@ export function PortfolioPanel({
                   setCashAction(action);
                   setCashError(null);
                 }}
-                className={`flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium transition ${
+                className={`flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-2 text-[11px] font-medium transition sm:py-1.5 ${
                   cashAction === action
                     ? "bg-emerald-600 text-white"
                     : "text-app-muted hover:text-app-fg"
@@ -126,8 +126,8 @@ export function PortfolioPanel({
 
           <form onSubmit={handleCashSubmit} className="space-y-2">
             <label className="block text-xs font-medium text-app-muted">
-              {cashAction === "deposit" && "Deposit demo cash (PKR)"}
-              {cashAction === "withdraw" && "Withdraw demo cash (PKR)"}
+              {cashAction === "deposit" && "Deposit cash (PKR)"}
+              {cashAction === "withdraw" && "Withdraw cash (PKR)"}
               {cashAction === "set" && "Set total cash balance (PKR)"}
             </label>
             <div className="flex gap-2">

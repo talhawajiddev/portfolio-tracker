@@ -33,11 +33,11 @@ export function InitialCashModal({ onSetCash, onDismiss }: Props) {
           <Wallet className="h-6 w-6" />
         </div>
         <h2 id="initial-cash-title" className="text-lg font-bold text-app-fg">
-          Set your demo cash
+          Set your starting cash
         </h2>
         <p className="mt-2 text-sm text-app-muted">
-          Paper trading starts with zero balance. Enter how much demo cash (PKR)
-          you want in your portfolio before placing trades.
+          Paper trading starts with zero balance. Enter how much cash (PKR) you
+          want in your portfolio before placing trades.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-3">

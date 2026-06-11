@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Activity, ArrowLeft, BarChart3, RefreshCw } from "lucide-react";
+import { Activity, ArrowLeft, RefreshCw } from "lucide-react";
+import { AnalyticsButton } from "./AnalyticsButton";
 import { normalizePortfolio } from "@/lib/transactions";
 import type { DemoOrder, DemoPortfolio, PortfolioPosition } from "@/types/market";
 import { PortfolioAnalytics } from "./PortfolioAnalytics";
@@ -104,7 +105,7 @@ export function AdminDashboard({
   return (
     <div className="min-h-screen bg-app text-app-fg">
       <header className="border-b border-app bg-header backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-500">
               <Activity className="h-5 w-5" />
@@ -124,13 +125,7 @@ export function AdminDashboard({
             >
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </button>
-            <Link
-              href="/analytics"
-              className="flex items-center gap-1 rounded-lg border border-app px-3 py-2 text-xs text-app-muted hover:text-app-fg"
-            >
-              <BarChart3 className="h-3.5 w-3.5" />
-              My analytics
-            </Link>
+            <AnalyticsButton size="sm" />
             <Link
               href="/"
               className="flex items-center gap-1 rounded-lg border border-app px-3 py-2 text-xs text-app-muted hover:text-app-fg"
@@ -142,7 +137,7 @@ export function AdminDashboard({
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-4 p-4 lg:p-6">
+      <main className="mx-auto max-w-6xl space-y-4 p-3 sm:p-4 lg:p-6">
         <div className="flex flex-wrap gap-2">
           <button
             type="button"

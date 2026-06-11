@@ -20,7 +20,7 @@ interface Props {
 export function PriceChart({ data, positive }: Props) {
   if (!data.length) {
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-slate-500">
+      <div className="flex h-48 items-center justify-center text-sm text-slate-500 sm:h-64">
         No intraday data available
       </div>
     );

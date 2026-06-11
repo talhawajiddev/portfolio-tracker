@@ -29,7 +29,7 @@ export function OrderPanel({
   if (!stock) {
     return (
       <div className="rounded-2xl border border-app bg-surface p-6 text-center text-sm text-app-muted">
-        Select a stock to place a demo order
+        Select a stock to place an order
       </div>
     );
   }
@@ -46,8 +46,8 @@ export function OrderPanel({
   }
 
   return (
-    <div className="rounded-2xl border border-app bg-surface p-5">
-      <div className="flex items-start justify-between gap-4">
+    <div className="rounded-2xl border border-app bg-surface p-4 sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold text-app-fg">{stock.symbol}</h2>
@@ -72,7 +72,7 @@ export function OrderPanel({
             <p className="text-xs text-app-muted">{stock.sector}</p>
           )}
         </div>
-        <div className="text-right">
+        <div className="sm:text-right">
           <div className="text-2xl font-bold tabular-nums text-app-fg">
             {pkr(stock.price)}
           </div>
@@ -85,7 +85,7 @@ export function OrderPanel({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-4 gap-2 text-center text-xs">
+      <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-4">
         <div className="rounded-lg bg-surface-2 p-2">
           <div className="text-app-muted">LDCP</div>
           <div className="font-medium text-app-fg-secondary">{pkr(stock.ldcp)}</div>
@@ -151,7 +151,7 @@ export function OrderPanel({
             : "bg-rose-500 text-app-fg hover:bg-rose-400"
         }`}
       >
-        Demo {side === "buy" ? "Buy" : "Sell"} {stock.symbol}
+        {side === "buy" ? "Buy" : "Sell"} {stock.symbol}
       </button>
 
       {message && (

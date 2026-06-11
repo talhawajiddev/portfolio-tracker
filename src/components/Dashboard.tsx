@@ -36,6 +36,7 @@ import { PriceChart } from "./PriceChart";
 import { StockTable } from "./StockTable";
 import { ThemeToggle } from "./ThemeToggle";
 import { TickerTape } from "./TickerTape";
+import { AnalyticsButton } from "./AnalyticsButton";
 import { UserMenu } from "./UserMenu";
 import { WatchlistPanel } from "./WatchlistPanel";
 import { timePkt } from "./format";
@@ -320,7 +321,7 @@ export function Dashboard({
   async function handleReset() {
     if (
       !confirm(
-        "Clear all positions, orders, and cash? You can add demo cash again afterward.",
+        "Clear all positions, orders, and cash? You can add cash again afterward.",
       )
     ) {
       return;
@@ -348,17 +349,22 @@ export function Dashboard({
         <InitialCashModal onSetCash={handleSetCash} onDismiss={dismissInitialCash} />
       )}
       <header className="shrink-0 border-b border-app bg-header backdrop-blur">
-        <div className="mx-auto flex max-w-[1800px] flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-500">
-              <Activity className="h-5 w-5" />
+        <div className="mx-auto flex max-w-[1800px] flex-col gap-3 px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4 sm:px-4 lg:px-6">
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-2 sm:justify-start sm:gap-3">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-500 sm:h-10 sm:w-10">
+                <Activity className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="truncate text-base font-bold text-app-fg sm:text-lg">
+                  PSX Trader
+                </h1>
+                <p className="truncate text-xs text-app-muted">
+                  {profile.display_name ?? profile.email}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-app-fg">PSX Demo Trader</h1>
-              <p className="text-xs text-app-muted">
-                {profile.display_name ?? profile.email}
-              </p>
-            </div>
+            <AnalyticsButton size="sm" className="shrink-0 sm:hidden" />
           </div>
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <ThemeToggle userId={userId} initialTheme={profile.theme} />
@@ -389,7 +395,7 @@ export function Dashboard({
             </span>
             {updatedAt && (
               <span
-                className={`text-xs ${isFresh ? "text-emerald-500" : "text-app-muted"}`}
+                className={`hidden text-xs sm:inline ${isFresh ? "text-emerald-500" : "text-app-muted"}`}
               >
                 {isFresh ? "● " : ""}
                 {timePkt(updatedAt)}
@@ -397,16 +403,16 @@ export function Dashboard({
             )}
           </div>
         </div>
-        <div className="mx-auto max-w-[1800px] px-4 pb-3 lg:px-6">
+        <div className="mx-auto max-w-[1800px] px-3 pb-3 sm:px-4 lg:px-6">
           <IndexBar indices={indices} />
         </div>
       </header>
 
       <TickerTape gainers={gainers} losers={losers} onSelect={setSelected} />
 
-      <main className="mx-auto grid w-full max-w-[1800px] flex-1 gap-4 p-4 lg:grid-cols-12 lg:gap-5 lg:p-6">
-        <section className="lg:col-span-4 xl:col-span-3">
-          <div className="h-[calc(100vh-200px)] min-h-[520px]">
+      <main className="mx-auto grid w-full max-w-[1800px] flex-1 grid-cols-1 gap-4 p-3 sm:p-4 lg:grid-cols-12 lg:gap-5 lg:p-6">
+        <section className="order-3 lg:order-none lg:col-span-4 xl:col-span-3">
+          <div className="h-[min(55vh,480px)] min-h-[280px] lg:h-[calc(100vh-200px)] lg:min-h-[520px]">
             <StockTable
               stocks={stocks}
               selected={selected}
@@ -417,14 +423,14 @@ export function Dashboard({
           </div>
         </section>
 
-        <section className="space-y-4 lg:col-span-5 xl:col-span-5">
-          <div className="rounded-2xl border border-app bg-surface p-4">
-            <div className="mb-2 flex items-center justify-between">
+        <section className="order-1 space-y-4 lg:order-none lg:col-span-5 xl:col-span-5">
+          <div className="rounded-2xl border border-app bg-surface p-3 sm:p-4">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-1">
               <h2 className="text-sm font-semibold text-app-fg">
                 Intraday · {selected ?? "—"}
               </h2>
-              <span className="text-[11px] text-app-muted">
-                Auto-refresh {LIVE_QUOTE_MS / 1000}s · ~5 min delayed
+              <span className="text-[10px] text-app-muted sm:text-[11px]">
+                Refresh {LIVE_QUOTE_MS / 1000}s · ~5 min delay
               </span>
             </div>
             <PriceChart
@@ -446,7 +452,7 @@ export function Dashboard({
           />
         </section>
 
-        <section className="space-y-4 lg:col-span-3 xl:col-span-4">
+        <section className="order-2 space-y-4 lg:order-none lg:col-span-3 xl:col-span-4">
           <WatchlistPanel
             symbols={watchlist}
             stocks={stocks}
@@ -470,8 +476,8 @@ export function Dashboard({
         </section>
       </main>
 
-      <footer className="shrink-0 border-t border-app py-3 text-center text-[11px] text-app-muted">
-        Demo only — not financial advice. Data © PSX / Capital Stake (delayed ~5 min).
+      <footer className="shrink-0 border-t border-app px-3 py-3 text-center text-[10px] text-app-muted sm:text-[11px]">
+        Paper trading only — not financial advice. Data © PSX / Capital Stake (delayed ~5 min).
       </footer>
     </div>
   );

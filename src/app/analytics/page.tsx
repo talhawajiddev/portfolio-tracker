@@ -22,8 +22,8 @@ export default async function AnalyticsRoute() {
   return (
     <div className="min-h-screen bg-app text-app-fg">
       <header className="border-b border-app bg-header backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-          <h1 className="text-lg font-bold">Portfolio Analytics</h1>
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4">
+          <h1 className="text-base font-bold sm:text-lg">Portfolio Analytics</h1>
           <Link
             href="/"
             className="flex items-center gap-1 rounded-lg border border-app px-3 py-2 text-xs text-app-muted hover:text-app-fg"
@@ -33,7 +33,7 @@ export default async function AnalyticsRoute() {
           </Link>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl p-4 lg:p-6">
+      <main className="mx-auto max-w-6xl p-3 sm:p-4 lg:p-6">
         <AnalyticsPage
           userId={user.id}
           profile={profile as UserProfile}

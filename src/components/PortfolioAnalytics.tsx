@@ -183,8 +183,8 @@ export function PortfolioAnalytics({
   const pnlUp = analytics.totalPnl >= 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         <div>
           <h2 className="text-lg font-bold text-app-fg">{ownerLabel}</h2>
           <p className="text-xs text-app-muted">
@@ -232,7 +232,7 @@ export function PortfolioAnalytics({
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title="Allocation by holding (% of portfolio)">
           {analytics.allocationByStock.length ? (
             <ResponsiveContainer width="100%" height={280}>

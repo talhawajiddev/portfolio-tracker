@@ -13,9 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PSX Demo Trader | Paper Trading Dashboard",
+  title: "PSX Trader | Paper Trading Dashboard",
   description:
-    "Demo Pakistan Stock Exchange paper trading with multi-user accounts and live delayed data.",
+    "Pakistan Stock Exchange paper trading with portfolio analytics and live delayed data.",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

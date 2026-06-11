@@ -42,12 +42,12 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-app p-4">
-      <div className="w-full max-w-md rounded-2xl border border-app bg-surface p-8 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl border border-app bg-surface p-5 shadow-xl sm:p-8">
         <div className="mb-6 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-500">
             <Activity className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-app-fg">PSX Demo Trader</h1>
+          <h1 className="text-2xl font-bold text-app-fg">PSX Trader</h1>
           <p className="mt-1 text-sm text-app-muted">Sign in to your paper trading account</p>
         </div>
 
