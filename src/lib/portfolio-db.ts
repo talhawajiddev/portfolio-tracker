@@ -100,9 +100,21 @@ export async function fetchProfile(
     .from("profiles")
     .select("id, email, display_name, role, theme")
     .eq("id", userId)
-    .single();
+    .maybeSingle();
   if (error) throw error;
-  return data;
+  if (data) return data;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return {
+    id: userId,
+    email: user?.email ?? "",
+    display_name: user?.email?.split("@")[0] ?? "User",
+    role: "user" as const,
+    theme: "dark" as const,
+  };
 }
 
 export async function updateProfileTheme(
