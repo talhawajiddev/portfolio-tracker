@@ -106,7 +106,7 @@ export interface DemoPortfolio {
   orders: DemoOrder[];
 }
 
-export const DEMO_STARTING_CASH = 5_000_000;
+export const DEMO_STARTING_CASH = 0;
 
 export type StockUniverse = "ALLSHR" | "KSE100" | "KMIALLSHR";
 

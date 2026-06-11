@@ -143,3 +143,15 @@ export function addManualHolding(
 
   return { portfolio: next };
 }
+
+export function addCash(
+  portfolio: DemoPortfolio,
+  amount: number,
+): { portfolio: DemoPortfolio; error?: string } {
+  if (amount <= 0 || !Number.isFinite(amount)) {
+    return { portfolio, error: "Enter a valid amount" };
+  }
+  const next = structuredClone(portfolio);
+  next.cash += amount;
+  return { portfolio: next };
+}

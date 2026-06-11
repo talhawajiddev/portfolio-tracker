@@ -20,6 +20,7 @@ import {
   saveWatchlistToDb,
 } from "@/lib/portfolio-db";
 import {
+  addCash,
   executeTrade,
   portfolioValue,
   positionFor,
@@ -273,10 +274,19 @@ export function Dashboard({
     return null;
   }
 
+  function handleAddCash(amount: number) {
+    if (!portfolio) return "Portfolio not loaded";
+    const result = addCash(portfolio, amount);
+    if (result.error) return result.error;
+    setPortfolio(result.portfolio);
+    persistPortfolio(result.portfolio);
+    return null;
+  }
+
   async function handleReset() {
     if (
       !confirm(
-        "Reset demo portfolio to PKR 50 lakh cash and clear all positions?",
+        "Clear all positions, orders, and cash? You can add demo cash again afterward.",
       )
     ) {
       return;
@@ -416,6 +426,7 @@ export function Dashboard({
             pnl={stats.pnl}
             pnlPercent={stats.pnlPercent}
             onReset={handleReset}
+            onAddCash={handleAddCash}
           />
         </section>
       </main>

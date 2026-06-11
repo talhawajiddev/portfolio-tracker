@@ -76,7 +76,7 @@ export default function SignupPage() {
           </div>
           <h1 className="text-2xl font-bold text-app-fg">Create Account</h1>
           <p className="mt-1 text-sm text-app-muted">
-            Start paper trading on PSX with PKR 50 lakh demo cash
+            Start paper trading on PSX — add your own demo cash to begin
           </p>
         </div>
 

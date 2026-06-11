@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Activity, ArrowLeft, BarChart3, RefreshCw } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { fetchAllPortfoliosForAdmin } from "@/lib/portfolio-db";
 import type { DemoOrder, DemoPortfolio, PortfolioPosition } from "@/types/market";
 import { PortfolioAnalytics } from "./PortfolioAnalytics";
 import { ThemeToggle } from "./ThemeToggle";
@@ -40,15 +38,28 @@ export function AdminDashboard({
 }) {
   const [rows, setRows] = useState<AdminRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string>(userId);
   const [tab, setTab] = useState<"users" | "mine">("users");
 
   async function load() {
     setLoading(true);
+    setError(null);
     try {
-      const supabase = createClient();
-      const data = await fetchAllPortfoliosForAdmin(supabase);
-      setRows(data as AdminRow[]);
+      const res = await fetch("/api/admin/portfolios");
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Failed to load user portfolios");
+        setRows([]);
+        return;
+      }
+      setRows((data.rows ?? []) as AdminRow[]);
+      if (data.rows?.length && !data.rows.some((r: AdminRow) => r.user_id === selectedId)) {
+        setSelectedId(data.rows[0].user_id);
+      }
+    } catch {
+      setError("Failed to load user portfolios");
+      setRows([]);
     } finally {
       setLoading(false);
     }
@@ -177,8 +188,18 @@ export function AdminDashboard({
           </div>
         )}
 
+        {error && (
+          <p className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-negative">
+            {error}
+            {error.includes("Forbidden") &&
+              " Make sure your account has role = admin in Supabase profiles."}
+          </p>
+        )}
+
         {loading && rows.length === 0 ? (
           <p className="text-center text-app-muted">Loading portfolios…</p>
+        ) : rows.length === 0 ? (
+          <p className="text-center text-app-muted">No user portfolios found.</p>
         ) : (
           <PortfolioAnalytics
             key={viewUserId}
@@ -186,6 +207,7 @@ export function AdminDashboard({
             portfolio={viewPortfolio}
             ownerLabel={viewLabel}
             readOnly={tab === "users"}
+            adminView={tab === "users"}
           />
         )}
       </main>

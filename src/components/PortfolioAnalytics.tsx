@@ -39,6 +39,7 @@ interface Props {
   portfolio: DemoPortfolio;
   ownerLabel: string;
   readOnly?: boolean;
+  adminView?: boolean;
   onPortfolioUpdate?: (portfolio: DemoPortfolio) => void;
 }
 
@@ -47,6 +48,7 @@ export function PortfolioAnalytics({
   portfolio,
   ownerLabel,
   readOnly = false,
+  adminView = false,
   onPortfolioUpdate,
 }: Props) {
   const supabase = useMemo(() => createClient(), []);
@@ -64,8 +66,16 @@ export function PortfolioAnalytics({
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
+      const snapPromise = adminView
+        ? fetch(`/api/admin/snapshots?userId=${userId}`).then(async (r) => {
+            const data = await r.json();
+            if (!r.ok) throw new Error(data.error ?? "Failed to load snapshots");
+            return data.snapshots ?? [];
+          })
+        : loadSnapshots(supabase, userId);
+
       const [snapRes, symRes, shariaRes] = await Promise.all([
-        loadSnapshots(supabase, userId),
+        snapPromise,
         fetch("/api/symbols").then((r) => r.json()),
         fetch("/api/stocks?universe=KMIALLSHR").then((r) => r.json()),
       ]);
@@ -92,7 +102,7 @@ export function PortfolioAnalytics({
     } finally {
       setLoading(false);
     }
-  }, [supabase, userId, positionSymbols]);
+  }, [supabase, userId, positionSymbols, adminView]);
 
   useEffect(() => {
     refresh();

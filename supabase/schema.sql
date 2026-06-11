@@ -35,7 +35,7 @@ CREATE TABLE public.profiles (
 CREATE TABLE public.portfolios (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
-  cash NUMERIC(16, 2) NOT NULL DEFAULT 5000000
+  cash NUMERIC(16, 2) NOT NULL DEFAULT 0
     CHECK (cash >= 0),
   positions JSONB NOT NULL DEFAULT '[]'::jsonb,
   orders JSONB NOT NULL DEFAULT '[]'::jsonb,
