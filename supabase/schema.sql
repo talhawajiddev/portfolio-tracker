@@ -180,12 +180,12 @@ CREATE INDEX idx_portfolios_user_id ON public.portfolios(user_id);
 -- ============================================================
 -- CREATE ADMIN USER (run AFTER signing up via the app)
 -- ============================================================
--- 1. Sign up at /signup with your admin email (e.g. admin@example.com)
+-- 1. Sign up at /signup with your admin email (talhawajid20@gmail.com)
 -- 2. Then run:
 --
 -- UPDATE public.profiles
 -- SET role = 'admin', display_name = 'Admin'
--- WHERE email = 'admin@example.com';
+-- WHERE email = 'talhawajid20@gmail.com';
 --
 -- ============================================================
 -- OPTIONAL: Promote first user to admin automatically

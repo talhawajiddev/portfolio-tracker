@@ -29,7 +29,10 @@ export default function LoginPage() {
     setLoading(false);
 
     if (authError) {
-      setError(authError.message);
+      const msg = authError.message.toLowerCase().includes("email not confirmed")
+        ? "Please confirm your email first (check your inbox), then sign in again."
+        : authError.message;
+      setError(msg);
       return;
     }
 

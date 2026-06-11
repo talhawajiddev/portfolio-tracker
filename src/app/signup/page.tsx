@@ -23,25 +23,48 @@ export default function SignupPage() {
     const password = form.get("password") as string;
     const displayName = form.get("display_name") as string;
 
+    const name = displayName || email.split("@")[0];
+
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password,
+        display_name: name,
+      }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      setLoading(false);
+      const msg = String(result.error ?? "Signup failed");
+      if (msg.toLowerCase().includes("rate limit")) {
+        setError(
+          "Too many signup emails sent. Add SUPABASE_SERVICE_ROLE_KEY to .env.local and restart the app, or wait 1 hour and try again.",
+        );
+      } else {
+        setError(msg);
+      }
+      return;
+    }
+
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signUp({
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: { display_name: displayName || email.split("@")[0] },
-      },
     });
 
     setLoading(false);
 
     if (authError) {
-      setError(authError.message);
+      setMessage("Account created! Please sign in.");
       return;
     }
 
-    setMessage("Account created! You can sign in now.");
-    setTimeout(() => router.push("/login"), 1500);
+    router.push("/");
+    router.refresh();
   }
 
   return (

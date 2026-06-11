@@ -20,7 +20,7 @@ PSX paper-trading dashboard for the **Pakistan Stock Exchange** with delayed liv
 1. Create a [Supabase](https://supabase.com) project.
 2. Copy `.env.local.example` → `.env.local` and add your URL + anon key.
 3. Run `supabase/schema.sql` then `supabase/migrations/002_analytics.sql` in **Supabase → SQL Editor**.
-4. Sign up via `/signup`, then promote your admin user (see SQL file footer).
+4. Sign up via `/signup` with `talhawajid20@gmail.com`, then promote your admin user (see SQL file footer).
 
 ```bash
 cd C:\Users\dell\Downloads\stocks

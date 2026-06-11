@@ -2,38 +2,41 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Search, Star } from "lucide-react";
-import { useRef } from "react";
-import type { StockFilters, StockQuote } from "@/types/market";
-import { compact, pct, pkr } from "./format";
-import { StockFiltersPanel } from "./StockFiltersPanel";
+import { useMemo, useRef, useState } from "react";
+import type { StockQuote } from "@/types/market";
+import { pct, pkr } from "./format";
 
 interface Props {
   stocks: StockQuote[];
-  filtered: StockQuote[];
-  filters: StockFilters;
-  sectors: string[];
   selected: string | null;
   watchlist: string[];
   onSelect: (symbol: string) => void;
-  onFiltersChange: (filters: StockFilters) => void;
   onToggleWatchlist: (symbol: string) => void;
 }
 
 export function StockTable({
   stocks,
-  filtered,
-  filters,
-  sectors,
   selected,
   watchlist,
   onSelect,
-  onFiltersChange,
   onToggleWatchlist,
 }: Props) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState("");
+
+  const displayed = useMemo(() => {
+    const sorted = [...stocks].sort((a, b) => a.symbol.localeCompare(b.symbol));
+    const q = query.trim().toLowerCase();
+    if (!q) return sorted;
+    return sorted.filter(
+      (s) =>
+        s.symbol.toLowerCase().includes(q) ||
+        (s.name?.toLowerCase().includes(q) ?? false),
+    );
+  }, [stocks, query]);
 
   const virtualizer = useVirtualizer({
-    count: filtered.length,
+    count: displayed.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 52,
     overscan: 12,
@@ -41,22 +44,17 @@ export function StockTable({
 
   return (
     <div className="flex h-full flex-col rounded-2xl border border-app bg-surface">
-      <StockFiltersPanel
-        filters={filters}
-        sectors={sectors}
-        resultCount={filtered.length}
-        totalCount={stocks.length}
-        onChange={onFiltersChange}
-      />
+      <div className="flex items-center justify-between gap-2 border-b border-app p-4">
+        <h2 className="text-sm font-semibold text-app-fg">Market Screener</h2>
+        <span className="text-xs text-app-muted">{stocks.length} stocks</span>
+      </div>
 
       <div className="border-b border-app px-4 py-2">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-muted" />
           <input
-            value={filters.query}
-            onChange={(e) =>
-              onFiltersChange({ ...filters, query: e.target.value })
-            }
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search GGL, TPL, HBL…"
             className="w-full rounded-lg border border-app bg-surface-2 py-2 pl-9 pr-3 text-sm text-app-fg outline-none ring-emerald-500/40 focus:ring-2"
           />
@@ -72,9 +70,9 @@ export function StockTable({
       </div>
 
       <div ref={parentRef} className="min-h-0 flex-1 overflow-auto">
-        {filtered.length === 0 ? (
+        {displayed.length === 0 ? (
           <p className="p-6 text-center text-sm text-app-muted">
-            No stocks match your filters.
+            No stocks match your search.
           </p>
         ) : (
           <div
@@ -82,7 +80,7 @@ export function StockTable({
             className="relative w-full"
           >
             {virtualizer.getVirtualItems().map((row) => {
-              const stock = filtered[row.index];
+              const stock = displayed[row.index];
               const up = stock.change >= 0;
               const active = selected === stock.symbol;
               const starred = watchlist.includes(stock.symbol);

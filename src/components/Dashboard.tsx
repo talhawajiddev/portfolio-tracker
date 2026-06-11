@@ -1,18 +1,17 @@
 "use client";
 
 import { Activity, Radio } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   IndexQuote,
   IntradayPoint,
-  StockFilters,
   StockQuote,
 } from "@/types/market";
-import { DEFAULT_FILTERS } from "@/types/market";
 import type { DemoPortfolio } from "@/types/market";
 import type { UserProfile } from "@/types/auth";
-import { applyStockFilters, extractSectors, topMovers } from "@/lib/filters";
+import { topMovers } from "@/lib/filters";
 import {
+  defaultPortfolio,
   loadPortfolioFromDb,
   loadWatchlistFromDb,
   recordSnapshot,
@@ -69,7 +68,6 @@ export function Dashboard({
 }) {
   const [indices, setIndices] = useState<IndexQuote[]>([]);
   const [stocks, setStocks] = useState<StockQuote[]>([]);
-  const [filters, setFilters] = useState<StockFilters>(DEFAULT_FILTERS);
   const [selected, setSelected] = useState<string | null>("GGL");
   const [chart, setChart] = useState<IntradayPoint[]>([]);
   const [portfolio, setPortfolio] = useState<DemoPortfolio | null>(null);
@@ -79,19 +77,12 @@ export function Dashboard({
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [live, setLive] = useState(true);
-  const universeRef = useRef(filters.universe);
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", profile.theme);
   }, [profile.theme]);
 
-  const filtered = useMemo(
-    () => applyStockFilters(stocks, filters),
-    [stocks, filters],
-  );
-
-  const sectors = useMemo(() => extractSectors(stocks), [stocks]);
   const { gainers, losers } = useMemo(() => topMovers(stocks, 10), [stocks]);
 
   const shariaSymbols = useMemo(
@@ -125,9 +116,9 @@ export function Dashboard({
     if (data.marketOpen !== undefined) setMarketOpen(data.marketOpen);
   }, []);
 
-  const refreshStocks = useCallback(async (universe: string) => {
+  const refreshStocks = useCallback(async () => {
     const res = await fetch(
-      `/api/stocks?universe=${universe}&force=1&t=${Date.now()}`,
+      `/api/stocks?universe=ALLSHR&force=1&t=${Date.now()}`,
     );
     const data = await res.json();
     if (!data.stocks) return;
@@ -183,6 +174,10 @@ export function Dashboard({
         }
       } catch (e) {
         console.error(e);
+        if (!cancelled) {
+          setPortfolio(defaultPortfolio());
+          setWatchlist([]);
+        }
       }
     })();
     return () => {
@@ -194,26 +189,24 @@ export function Dashboard({
     let cancelled = false;
     (async () => {
       setLoading(true);
-      universeRef.current = filters.universe;
-      await Promise.all([
-        refreshIndices(),
-        refreshStocks(filters.universe),
-      ]);
-      if (!cancelled) setLoading(false);
+      try {
+        await Promise.all([refreshIndices(), refreshStocks()]);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [filters.universe, refreshIndices, refreshStocks]);
+  }, [refreshIndices, refreshStocks]);
 
   useEffect(() => {
     if (!live) return;
     const stockMs = marketOpen ? LIVE_STOCKS_MS : CLOSED_STOCKS_MS;
     const idx = setInterval(refreshIndices, LIVE_INDICES_MS);
-    const stk = setInterval(
-      () => refreshStocks(universeRef.current),
-      stockMs,
-    );
+    const stk = setInterval(refreshStocks, stockMs);
     return () => {
       clearInterval(idx);
       clearInterval(stk);
@@ -369,13 +362,9 @@ export function Dashboard({
           <div className="h-[calc(100vh-200px)] min-h-[520px]">
             <StockTable
               stocks={stocks}
-              filtered={filtered}
-              filters={filters}
-              sectors={sectors}
               selected={selected}
               watchlist={watchlist}
               onSelect={setSelected}
-              onFiltersChange={setFilters}
               onToggleWatchlist={handleToggleWatchlist}
             />
           </div>
