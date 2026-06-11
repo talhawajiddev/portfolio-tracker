@@ -1,9 +1,11 @@
 "use client";
 
-import { Plus, RotateCcw } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, RotateCcw, Wallet } from "lucide-react";
 import { useState } from "react";
 import type { DemoOrder, DemoPortfolio } from "@/types/market";
 import { pkr, pct, timePkt } from "./format";
+
+type CashAction = "deposit" | "withdraw" | "set";
 
 interface Props {
   portfolio: DemoPortfolio;
@@ -12,7 +14,9 @@ interface Props {
   pnl: number;
   pnlPercent: number;
   onReset: () => void;
-  onAddCash: (amount: number) => string | null;
+  onDeposit: (amount: number) => string | null;
+  onWithdraw: (amount: number) => string | null;
+  onSetCash: (amount: number) => string | null;
 }
 
 export function PortfolioPanel({
@@ -22,16 +26,24 @@ export function PortfolioPanel({
   pnl,
   pnlPercent,
   onReset,
-  onAddCash,
+  onDeposit,
+  onWithdraw,
+  onSetCash,
 }: Props) {
+  const [cashAction, setCashAction] = useState<CashAction>("deposit");
   const [cashAmount, setCashAmount] = useState("");
   const [cashError, setCashError] = useState<string | null>(null);
   const up = pnl >= 0;
 
-  function handleAddCash(e: React.FormEvent) {
+  function handleCashSubmit(e: React.FormEvent) {
     e.preventDefault();
     const amount = Number(cashAmount);
-    const err = onAddCash(amount);
+    const err =
+      cashAction === "deposit"
+        ? onDeposit(amount)
+        : cashAction === "withdraw"
+          ? onWithdraw(amount)
+          : onSetCash(amount);
     if (err) {
       setCashError(err);
       return;
@@ -83,32 +95,68 @@ export function PortfolioPanel({
           </div>
         </div>
 
-        <form onSubmit={handleAddCash} className="mt-4 space-y-2">
-          <label className="block text-xs font-medium text-app-muted">
-            Add demo cash (PKR)
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              min="1"
-              step="1000"
-              value={cashAmount}
-              onChange={(e) => setCashAmount(e.target.value)}
-              placeholder="e.g. 500000"
-              className="min-w-0 flex-1 rounded-lg border border-app bg-surface-2 px-3 py-2 text-sm text-app-fg outline-none focus:ring-2 focus:ring-emerald-500/40"
-            />
-            <button
-              type="submit"
-              className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-500"
-            >
-              <Plus className="h-4 w-4" />
-              Add
-            </button>
+        <div className="mt-4 space-y-2">
+          <div className="flex gap-1 rounded-lg border border-app bg-surface-2 p-1">
+            {(
+              [
+                ["deposit", "Deposit", ArrowDownLeft],
+                ["withdraw", "Withdraw", ArrowUpRight],
+                ["set", "Set balance", Wallet],
+              ] as const
+            ).map(([action, label, Icon]) => (
+              <button
+                key={action}
+                type="button"
+                onClick={() => {
+                  setCashAction(action);
+                  setCashError(null);
+                }}
+                className={`flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium transition ${
+                  cashAction === action
+                    ? "bg-emerald-600 text-white"
+                    : "text-app-muted hover:text-app-fg"
+                }`}
+              >
+                <Icon className="h-3 w-3" />
+                {label}
+              </button>
+            ))}
           </div>
-          {cashError && (
-            <p className="text-xs text-negative">{cashError}</p>
-          )}
-        </form>
+
+          <form onSubmit={handleCashSubmit} className="space-y-2">
+            <label className="block text-xs font-medium text-app-muted">
+              {cashAction === "deposit" && "Deposit demo cash (PKR)"}
+              {cashAction === "withdraw" && "Withdraw demo cash (PKR)"}
+              {cashAction === "set" && "Set total cash balance (PKR)"}
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min={cashAction === "set" ? "0" : "1"}
+                step="1000"
+                value={cashAmount}
+                onChange={(e) => setCashAmount(e.target.value)}
+                placeholder={
+                  cashAction === "set" ? "e.g. 1000000" : "e.g. 500000"
+                }
+                className="min-w-0 flex-1 rounded-lg border border-app bg-surface-2 px-3 py-2 text-sm text-app-fg outline-none focus:ring-2 focus:ring-emerald-500/40"
+              />
+              <button
+                type="submit"
+                className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-500"
+              >
+                {cashAction === "deposit"
+                  ? "Deposit"
+                  : cashAction === "withdraw"
+                    ? "Withdraw"
+                    : "Set"}
+              </button>
+            </div>
+            {cashError && (
+              <p className="text-xs text-negative">{cashError}</p>
+            )}
+          </form>
+        </div>
       </div>
 
       <div className="rounded-2xl border border-app bg-surface p-4">

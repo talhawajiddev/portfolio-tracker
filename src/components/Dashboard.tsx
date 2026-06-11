@@ -20,12 +20,15 @@ import {
   saveWatchlistToDb,
 } from "@/lib/portfolio-db";
 import {
-  addCash,
+  depositCash,
   executeTrade,
   portfolioValue,
   positionFor,
+  setCashBalance,
+  withdrawCash,
 } from "@/lib/portfolio";
 import { createClient } from "@/lib/supabase/client";
+import { InitialCashModal } from "./InitialCashModal";
 import { IndexBar } from "./IndexBar";
 import { OrderPanel } from "./OrderPanel";
 import { PortfolioPanel } from "./PortfolioPanel";
@@ -78,11 +81,22 @@ export function Dashboard({
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [live, setLive] = useState(true);
+  const [showInitialCash, setShowInitialCash] = useState(false);
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", profile.theme);
   }, [profile.theme]);
+
+  useEffect(() => {
+    if (!portfolio || loading) return;
+    const dismissed = sessionStorage.getItem("psx_initial_cash_dismissed");
+    const needsCash =
+      portfolio.cash === 0 &&
+      portfolio.positions.length === 0 &&
+      portfolio.orders.length === 0;
+    setShowInitialCash(needsCash && !dismissed);
+  }, [portfolio, loading]);
 
   const { gainers, losers } = useMemo(() => topMovers(stocks, 10), [stocks]);
 
@@ -274,13 +288,33 @@ export function Dashboard({
     return null;
   }
 
-  function handleAddCash(amount: number) {
+  function applyCashChange(
+    result: { portfolio: DemoPortfolio; error?: string },
+  ): string | null {
     if (!portfolio) return "Portfolio not loaded";
-    const result = addCash(portfolio, amount);
     if (result.error) return result.error;
     setPortfolio(result.portfolio);
     persistPortfolio(result.portfolio);
+    sessionStorage.setItem("psx_initial_cash_dismissed", "1");
+    setShowInitialCash(false);
     return null;
+  }
+
+  function handleDeposit(amount: number) {
+    return applyCashChange(depositCash(portfolio!, amount));
+  }
+
+  function handleWithdraw(amount: number) {
+    return applyCashChange(withdrawCash(portfolio!, amount));
+  }
+
+  function handleSetCash(amount: number) {
+    return applyCashChange(setCashBalance(portfolio!, amount));
+  }
+
+  function dismissInitialCash() {
+    sessionStorage.setItem("psx_initial_cash_dismissed", "1");
+    setShowInitialCash(false);
   }
 
   async function handleReset() {
@@ -310,6 +344,9 @@ export function Dashboard({
 
   return (
     <div className="flex min-h-screen flex-col bg-app text-app-fg-secondary">
+      {showInitialCash && (
+        <InitialCashModal onSetCash={handleSetCash} onDismiss={dismissInitialCash} />
+      )}
       <header className="shrink-0 border-b border-app bg-header backdrop-blur">
         <div className="mx-auto flex max-w-[1800px] flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
           <div className="flex items-center gap-3">
@@ -426,7 +463,9 @@ export function Dashboard({
             pnl={stats.pnl}
             pnlPercent={stats.pnlPercent}
             onReset={handleReset}
-            onAddCash={handleAddCash}
+            onDeposit={handleDeposit}
+            onWithdraw={handleWithdraw}
+            onSetCash={handleSetCash}
           />
         </section>
       </main>

@@ -37,30 +37,37 @@ export function computePortfolioAnalytics(
   const totalPnlPercent = invested ? (totalPnl / invested) * 100 : 0;
   const cashPercent = equity ? (portfolio.cash / equity) * 100 : 100;
 
-  const withAllocation = positions.map((p) => ({
-    ...p,
-    allocationPercent: equity ? (p.marketValue / equity) * 100 : 0,
-  }));
+  const withAllocation = positions.map((p) => {
+    const chartValue =
+      p.marketValue > 0 ? p.marketValue : p.costBasis > 0 ? p.costBasis : 0;
+    return {
+      ...p,
+      chartValue,
+      allocationPercent: equity ? (chartValue / equity) * 100 : 0,
+    };
+  });
 
   const allocationByStock: AllocationSlice[] = [
     ...withAllocation
-      .filter((p) => p.marketValue > 0)
-      .sort((a, b) => b.marketValue - a.marketValue)
+      .filter((p) => p.chartValue > 0)
+      .sort((a, b) => b.chartValue - a.chartValue)
       .map((p, i) => ({
         name: p.symbol,
         symbol: p.symbol,
-        value: p.marketValue,
+        value: p.chartValue,
         percent: p.allocationPercent,
         color: CHART_COLORS[i % CHART_COLORS.length],
       })),
   ];
 
-  if (portfolio.cash > 0 && equity > 0) {
+  const allocatedStockValue = allocationByStock.reduce((s, x) => s + x.value, 0);
+  const cashChartValue = Math.max(0, equity - allocatedStockValue);
+  if (cashChartValue > 0 && equity > 0) {
     allocationByStock.push({
       name: "Cash",
       symbol: "CASH",
-      value: portfolio.cash,
-      percent: cashPercent,
+      value: cashChartValue,
+      percent: (cashChartValue / equity) * 100,
       color: "#94a3b8",
     });
   }
@@ -68,14 +75,14 @@ export function computePortfolioAnalytics(
   let shariaValue = 0;
   let nonShariaValue = 0;
   for (const p of withAllocation) {
-    if (p.isSharia) shariaValue += p.marketValue;
-    else nonShariaValue += p.marketValue;
+    if (p.isSharia) shariaValue += p.chartValue;
+    else nonShariaValue += p.chartValue;
   }
 
   const sectorMap = new Map<string, number>();
   for (const p of withAllocation) {
     const key = p.sector || "Unknown";
-    sectorMap.set(key, (sectorMap.get(key) ?? 0) + p.marketValue);
+    sectorMap.set(key, (sectorMap.get(key) ?? 0) + p.chartValue);
   }
 
   const sectorSplit: AllocationSlice[] = [...sectorMap.entries()]

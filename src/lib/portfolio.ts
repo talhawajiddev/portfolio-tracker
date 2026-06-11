@@ -144,14 +144,51 @@ export function addManualHolding(
   return { portfolio: next };
 }
 
-export function addCash(
+function validateAmount(amount: number, allowZero = false): string | null {
+  if (!Number.isFinite(amount) || amount < 0) {
+    return "Enter a valid amount";
+  }
+  if (!allowZero && amount <= 0) {
+    return "Amount must be greater than zero";
+  }
+  return null;
+}
+
+export function depositCash(
   portfolio: DemoPortfolio,
   amount: number,
 ): { portfolio: DemoPortfolio; error?: string } {
-  if (amount <= 0 || !Number.isFinite(amount)) {
-    return { portfolio, error: "Enter a valid amount" };
-  }
+  const err = validateAmount(amount);
+  if (err) return { portfolio, error: err };
   const next = structuredClone(portfolio);
   next.cash += amount;
   return { portfolio: next };
 }
+
+export function withdrawCash(
+  portfolio: DemoPortfolio,
+  amount: number,
+): { portfolio: DemoPortfolio; error?: string } {
+  const err = validateAmount(amount);
+  if (err) return { portfolio, error: err };
+  if (amount > portfolio.cash) {
+    return { portfolio, error: "Insufficient cash to withdraw" };
+  }
+  const next = structuredClone(portfolio);
+  next.cash -= amount;
+  return { portfolio: next };
+}
+
+export function setCashBalance(
+  portfolio: DemoPortfolio,
+  amount: number,
+): { portfolio: DemoPortfolio; error?: string } {
+  const err = validateAmount(amount, true);
+  if (err) return { portfolio, error: err };
+  const next = structuredClone(portfolio);
+  next.cash = amount;
+  return { portfolio: next };
+}
+
+/** @deprecated Use depositCash */
+export const addCash = depositCash;

@@ -58,8 +58,12 @@ export function PortfolioAnalytics({
   const [shariaSymbols, setShariaSymbols] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
-  const positionSymbols = useMemo(
-    () => portfolio.positions.map((p) => p.symbol),
+  const positionSymbolsKey = useMemo(
+    () =>
+      portfolio.positions
+        .map((p) => p.symbol)
+        .sort()
+        .join(","),
     [portfolio.positions],
   );
 
@@ -87,22 +91,38 @@ export function PortfolioAnalytics({
         (shariaRes.stocks ?? []).map((s: StockQuote) => s.symbol),
       );
       setShariaSymbols(sharia);
-
-      if (positionSymbols.length) {
-        const qRes = await fetch(
-          `/api/quotes?symbols=${positionSymbols.join(",")}&t=${Date.now()}`,
-        );
-        const qData = await qRes.json();
-        setQuotes(qData.quotes ?? []);
-      } else {
-        setQuotes([]);
-      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
-  }, [supabase, userId, positionSymbols, adminView]);
+  }, [supabase, userId, adminView]);
+
+  useEffect(() => {
+    if (!positionSymbolsKey) {
+      setQuotes([]);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const qRes = await fetch(
+          `/api/quotes?symbols=${positionSymbolsKey}&t=${Date.now()}`,
+        );
+        const qData = await qRes.json();
+        if (!cancelled) {
+          setQuotes(qData.quotes ?? []);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [positionSymbolsKey]);
 
   useEffect(() => {
     refresh();
