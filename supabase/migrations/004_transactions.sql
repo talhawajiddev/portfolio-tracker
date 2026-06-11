@@ -1,0 +1,5 @@
+-- OPTIONAL: separate transactions column (skip if you get "must be owner" error).
+-- The app stores transactions inside portfolios.orders JSONB (v2 wrapper) by default.
+--
+-- ALTER TABLE public.portfolios
+--   ADD COLUMN IF NOT EXISTS transactions JSONB NOT NULL DEFAULT '[]'::jsonb;

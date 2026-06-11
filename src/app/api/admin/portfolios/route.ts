@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient, requireAdminSession } from "@/lib/supabase/admin";
+import { parseOrdersColumn } from "@/lib/transactions";
 
 export const dynamic = "force-dynamic";
 
@@ -27,11 +28,13 @@ export async function GET() {
 
     const rows = (profiles ?? []).map((profile) => {
       const portfolio = portfolioMap.get(profile.id);
+      const parsed = parseOrdersColumn(portfolio?.orders);
       return {
         user_id: profile.id,
         cash: portfolio?.cash ?? 0,
         positions: portfolio?.positions ?? [],
-        orders: portfolio?.orders ?? [],
+        orders: parsed.orders,
+        transactions: parsed.transactions,
         updated_at: portfolio?.updated_at ?? null,
         profile: {
           email: profile.email,

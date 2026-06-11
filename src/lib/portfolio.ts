@@ -1,11 +1,13 @@
 import type { DemoOrder, DemoPortfolio, PortfolioPosition } from "@/types/market";
 import { DEMO_STARTING_CASH } from "@/types/market";
+import { appendTransaction, createTransaction } from "./transactions";
 
 export function defaultPortfolio(): DemoPortfolio {
   return {
     cash: DEMO_STARTING_CASH,
     positions: [],
     orders: [],
+    transactions: [],
   };
 }
 
@@ -64,7 +66,20 @@ export function executeTrade(
   };
   next.orders = [order, ...next.orders].slice(0, 50);
 
-  return { portfolio: next };
+  const withTx = appendTransaction(
+    next,
+    createTransaction({
+      type: side,
+      amount: side === "buy" ? -total : total,
+      cashAfter: next.cash,
+      symbol,
+      shares,
+      price,
+      description: `${side.toUpperCase()} ${shares} ${symbol} @ ${price.toFixed(2)}`,
+    }),
+  );
+
+  return { portfolio: withTx };
 }
 
 export function portfolioValue(
@@ -162,7 +177,17 @@ export function depositCash(
   if (err) return { portfolio, error: err };
   const next = structuredClone(portfolio);
   next.cash += amount;
-  return { portfolio: next };
+  return {
+    portfolio: appendTransaction(
+      next,
+      createTransaction({
+        type: "deposit",
+        amount,
+        cashAfter: next.cash,
+        description: `Deposit PKR ${amount.toLocaleString("en-PK")}`,
+      }),
+    ),
+  };
 }
 
 export function withdrawCash(
@@ -176,7 +201,17 @@ export function withdrawCash(
   }
   const next = structuredClone(portfolio);
   next.cash -= amount;
-  return { portfolio: next };
+  return {
+    portfolio: appendTransaction(
+      next,
+      createTransaction({
+        type: "withdraw",
+        amount: -amount,
+        cashAfter: next.cash,
+        description: `Withdraw PKR ${amount.toLocaleString("en-PK")}`,
+      }),
+    ),
+  };
 }
 
 export function setCashBalance(
@@ -185,9 +220,21 @@ export function setCashBalance(
 ): { portfolio: DemoPortfolio; error?: string } {
   const err = validateAmount(amount, true);
   if (err) return { portfolio, error: err };
+  const prev = portfolio.cash;
   const next = structuredClone(portfolio);
   next.cash = amount;
-  return { portfolio: next };
+  const delta = amount - prev;
+  return {
+    portfolio: appendTransaction(
+      next,
+      createTransaction({
+        type: "set_balance",
+        amount: delta,
+        cashAfter: next.cash,
+        description: `Balance set to PKR ${amount.toLocaleString("en-PK")}${prev !== amount ? ` (was ${prev.toLocaleString("en-PK")})` : ""}`,
+      }),
+    ),
+  };
 }
 
 /** @deprecated Use depositCash */

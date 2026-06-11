@@ -7,21 +7,34 @@ import type {
 } from "@/types/market";
 import { DEMO_STARTING_CASH } from "@/types/market";
 import { computePortfolioAnalytics } from "./analytics";
+import {
+  normalizePortfolio,
+  parseOrdersColumn,
+  serializeOrdersColumn,
+} from "./transactions";
 
 export function defaultPortfolio(): DemoPortfolio {
-  return { cash: DEMO_STARTING_CASH, positions: [], orders: [] };
+  return { cash: DEMO_STARTING_CASH, positions: [], orders: [], transactions: [] };
 }
 
 function parsePortfolio(row: {
   cash: number | string;
   positions: unknown;
   orders: unknown;
+  transactions?: unknown;
 }): DemoPortfolio {
-  return {
+  const fromOrders = parseOrdersColumn(row.orders);
+  const fromColumn = Array.isArray(row.transactions)
+    ? (row.transactions as DemoPortfolio["transactions"])
+    : [];
+
+  return normalizePortfolio({
     cash: Number(row.cash),
     positions: (row.positions as PortfolioPosition[]) ?? [],
-    orders: (row.orders as DemoOrder[]) ?? [],
-  };
+    orders: fromOrders.orders,
+    transactions:
+      fromColumn.length > 0 ? fromColumn : fromOrders.transactions,
+  });
 }
 
 export async function loadPortfolioFromDb(
@@ -49,7 +62,7 @@ export async function savePortfolioToDb(
       user_id: userId,
       cash: portfolio.cash,
       positions: portfolio.positions,
-      orders: portfolio.orders,
+      orders: serializeOrdersColumn(portfolio),
     },
     { onConflict: "user_id" },
   );

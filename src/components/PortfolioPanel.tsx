@@ -2,8 +2,9 @@
 
 import { ArrowDownLeft, ArrowUpRight, RotateCcw, Wallet } from "lucide-react";
 import { useState } from "react";
-import type { DemoOrder, DemoPortfolio } from "@/types/market";
-import { pkr, pct, timePkt } from "./format";
+import type { DemoPortfolio } from "@/types/market";
+import { pkr, pct } from "./format";
+import { TransactionStatement } from "./TransactionStatement";
 
 type CashAction = "deposit" | "withdraw" | "set";
 
@@ -132,8 +133,8 @@ export function PortfolioPanel({
             <div className="flex gap-2">
               <input
                 type="number"
-                min={cashAction === "set" ? "0" : "1"}
-                step="1000"
+                min={cashAction === "set" ? "0" : "0.01"}
+                step="any"
                 value={cashAmount}
                 onChange={(e) => setCashAmount(e.target.value)}
                 placeholder={
@@ -196,30 +197,7 @@ export function PortfolioPanel({
         )}
       </div>
 
-      <div className="rounded-2xl border border-app bg-surface p-4">
-        <h3 className="text-sm font-semibold text-app-fg">Recent orders</h3>
-        {portfolio.orders.length === 0 ? (
-          <p className="mt-3 text-sm text-app-muted">No trades yet.</p>
-        ) : (
-          <ul className="mt-3 max-h-48 space-y-2 overflow-auto">
-            {portfolio.orders.slice(0, 8).map((order: DemoOrder) => (
-              <li
-                key={order.id}
-                className="flex items-center justify-between rounded-lg bg-surface-2 px-3 py-2 text-xs"
-              >
-                <span
-                  className={
-                    order.side === "buy" ? "text-positive" : "text-negative"
-                  }
-                >
-                  {order.side.toUpperCase()} {order.shares} {order.symbol}
-                </span>
-                <span className="text-app-muted">{timePkt(order.timestamp)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <TransactionStatement transactions={portfolio.transactions ?? []} />
     </div>
   );
 }

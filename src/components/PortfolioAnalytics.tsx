@@ -32,6 +32,7 @@ import type {
   StockQuote,
 } from "@/types/market";
 import { AddHoldingForm } from "./AddHoldingForm";
+import { TransactionStatement } from "./TransactionStatement";
 import { compact, pct, pkr } from "./format";
 
 interface Props {
@@ -451,6 +452,11 @@ export function PortfolioAnalytics({
           </table>
         </div>
       </div>
+
+      <TransactionStatement
+        transactions={portfolio.transactions ?? []}
+        title={`${ownerLabel} — statement`}
+      />
 
       {!readOnly && (
         <AddHoldingForm

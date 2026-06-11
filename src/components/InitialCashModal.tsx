@@ -47,7 +47,7 @@ export function InitialCashModal({ onSetCash, onDismiss }: Props) {
           <input
             type="number"
             min="0"
-            step="1000"
+            step="any"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="w-full rounded-lg border border-app bg-surface-2 px-3 py-2.5 text-sm text-app-fg outline-none focus:ring-2 focus:ring-emerald-500/40"

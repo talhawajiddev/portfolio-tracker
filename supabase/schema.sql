@@ -39,6 +39,7 @@ CREATE TABLE public.portfolios (
     CHECK (cash >= 0),
   positions JSONB NOT NULL DEFAULT '[]'::jsonb,
   orders JSONB NOT NULL DEFAULT '[]'::jsonb,
+  -- transactions are stored inside orders JSONB as { v: 2, orders, transactions }
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

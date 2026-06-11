@@ -100,10 +100,31 @@ export interface DemoOrder {
   timestamp: number;
 }
 
+export type TransactionType =
+  | "deposit"
+  | "withdraw"
+  | "set_balance"
+  | "buy"
+  | "sell";
+
+export interface PortfolioTransaction {
+  id: string;
+  type: TransactionType;
+  timestamp: number;
+  /** Signed PKR cash flow: positive = in, negative = out */
+  amount: number;
+  cashAfter: number;
+  symbol?: string;
+  shares?: number;
+  price?: number;
+  description?: string;
+}
+
 export interface DemoPortfolio {
   cash: number;
   positions: PortfolioPosition[];
   orders: DemoOrder[];
+  transactions: PortfolioTransaction[];
 }
 
 export const DEMO_STARTING_CASH = 0;

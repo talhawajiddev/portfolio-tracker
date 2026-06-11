@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Activity, ArrowLeft, BarChart3, RefreshCw } from "lucide-react";
+import { normalizePortfolio } from "@/lib/transactions";
 import type { DemoOrder, DemoPortfolio, PortfolioPosition } from "@/types/market";
 import { PortfolioAnalytics } from "./PortfolioAnalytics";
 import { ThemeToggle } from "./ThemeToggle";
@@ -13,6 +14,7 @@ interface AdminRow {
   cash: number | string;
   positions: PortfolioPosition[];
   orders: DemoOrder[];
+  transactions?: DemoPortfolio["transactions"];
   updated_at: string;
   profile: {
     email: string;
@@ -22,11 +24,12 @@ interface AdminRow {
 }
 
 function toPortfolio(row: AdminRow): DemoPortfolio {
-  return {
+  return normalizePortfolio({
     cash: Number(row.cash),
     positions: row.positions ?? [],
     orders: row.orders ?? [],
-  };
+    transactions: row.transactions ?? [],
+  });
 }
 
 export function AdminDashboard({
@@ -86,10 +89,10 @@ export function AdminDashboard({
     tab === "mine"
       ? myRow
         ? toPortfolio(myRow)
-        : { cash: 0, positions: [], orders: [] }
+        : { cash: 0, positions: [], orders: [], transactions: [] }
       : selectedRow
         ? toPortfolio(selectedRow)
-        : { cash: 0, positions: [], orders: [] };
+        : { cash: 0, positions: [], orders: [], transactions: [] };
 
   const viewLabel =
     tab === "mine"
